@@ -2,5 +2,5 @@
 *доступ в веб интерфейс через http://localhost:8080*
     
     git clone https://github.com/barab00lka/ecole-TicTacToe_Web-Go.git
-    cd ecole-TicTacToe_Web/src
+    cd ecole-TicTacToe_Web-Go/src
     go run cmd/main.go
