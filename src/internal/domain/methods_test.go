@@ -38,7 +38,7 @@ func TestValidate(t *testing.T) {
 
 func TestMakeAMoveMaximize(t *testing.T) {
 	game2.MakeAMove() // should place 'a' on [2][1] to win
-	if game2.Board.Cell[2][1] != ai {
+	if game2.Board.Cell[2][1] != Ai {
 		t.Error("Ai failed to make the best move")
 	} else {
 		PrintBoard(game2)
@@ -48,8 +48,8 @@ func TestMakeAMoveMaximize(t *testing.T) {
 		Board: Board{
 			Cell: [H][W]int8{{'a','p', 'p'}, {'a','a','p'}, {'p',0,0}}	}, Over: false, 
 	} 
-	diag.MakeAMove()// should place ai on [2,2]
-	if diag.Board.Cell[2][2] != ai {
+	diag.MakeAMove()// should place Ai on [2,2]
+	if diag.Board.Cell[2][2] != Ai {
 		t.Error("Ai failed to make the best move")
 		PrintBoard(diag)
 	} else {
@@ -58,8 +58,8 @@ func TestMakeAMoveMaximize(t *testing.T) {
 }
 
 func TestMakeAMoveMinimize(t *testing.T) {
-	game.MakeAMove() // should place 'a' on [2][2] to stop player from winning
-	if game.Board.Cell[2][2] != ai {
+	game.MakeAMove() // should place 'a' on [2][2] to stop Player from winning
+	if game.Board.Cell[2][2] != Ai {
 		t.Error("Ai failed to make the best move")
 	} else {
 		PrintBoard(game)
@@ -101,7 +101,7 @@ func TestGameOverWithWin(t *testing.T) {
 			Cell: [H][W]int8{{'a','a', 'p'}, {'a','p','p'}, {'a','p',0}}	}, Over: false, 
 	}  
 	board.Over = board.IsOver()
-	if board.Over != true && board.Winner != ai {
+	if board.Over != true && board.Winner != Ai {
 		t.Error("Failed to capture GameOver state")
 		PrintBoard(board)
 	} else {
@@ -112,7 +112,7 @@ func TestGameOverWithWin(t *testing.T) {
 			Cell: [H][W]int8{{0,'a', 'p'}, {'a','p','p'}, {'p','p','a'}}	}, Over: false, 
 	}
 	board.Over = board.IsOver() 
-	if board.Over != true && board.Winner != player {
+	if board.Over != true && board.Winner != Player {
 		t.Error("Failed to capture GameOver state")
 		PrintBoard(board)
 	} else {

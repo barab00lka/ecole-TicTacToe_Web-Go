@@ -1,22 +1,20 @@
 package web
 
 import (
-	"tictactoe/internal/domain"
-	"tictactoe/internal/datasource"
+	"tictactoe/internal/service"
 	"net/http"
 	"errors"
 	"encoding/json"
 	"github.com/google/uuid"
-	"github.com/fatih/color"
 )
 
 type Handler struct {
-	db datasource.Repository[*domain.GameState]
+	s service.GameService
 }
 
-func NewHandler(repo datasource.Repository[*domain.GameState]) *Handler {
+func NewHandler() *Handler {
 	return &Handler{
-		db: repo, 
+		s: service.NewService(), 
 	}
 }
 
@@ -30,7 +28,7 @@ func readRequest(r * http.Request) (PlayerReq, error){
 		return PlayerReq{}, errors.New("missing game UUID")
     }
 	
-	// Parse UUID
+    // Parse UUID
     webUUID, err := uuid.Parse(idStr)
     if err != nil {
         return PlayerReq{}, errors.New("invalid UUID format")
@@ -55,67 +53,51 @@ func (h *Handler) PlayerNewMove(w http.ResponseWriter, r *http.Request) {
 
 	playerBoard := ToDomainBoard(req.Grid)
 	playerUUID := req.Id
+	var response any
+	var statusCode int
 
 	// if save exists
-	if game := h.db.Load(playerUUID); game != nil {
-		if game.Over {
-			// Clear the board
-			game.Board = domain.Board{}
-			game.Over = false 
-			game.Winner = 0 
-
-			c := color.New(color.FgHiYellow)
-			c.Printf("[WEB]: uid: %v, msg: Created new Board. Games played: %d\n", playerUUID, game.Score.Ai + game.Score.Pl + game.Score.Draw)
-		}
-		if err := game.ValidateState(&playerBoard); err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-
-			domain.PrintBoard(*game)
-
-    		return
-		} else {
-			game.Board = playerBoard // update board with player's move 
-			game.MakeAMove() // calculate computer move and update board
-			domain.PrintBoard(*game)
-			if err := h.db.Save(game); err != nil {
-				panic(err) // in case of Repository Save error
-			}
-			// Craft http json response 
-		    resp := FromDomainGameState(game)
-		    w.Header().Set("Content-Type", "application/json")
-		    w.WriteHeader(http.StatusOK)
-		    json.NewEncoder(w).Encode(resp)
-		}
-	// if no prior save exists
+	// if game := h.s.db.Load(playerUUID); game != nil {
+	if err := h.s.ValidateState(playerUUID, &playerBoard); err != nil {
+		statusCode = http.StatusBadRequest
+		response = map[string]string{"error": err.Error()}
 	} else {
-		// Init game for player
-		newGame := domain.NewGameService(playerUUID)
-		c := color.New(color.FgHiYellow)
-		c.Printf("[WEB]: uid: %v, msg: Initialized new GameState\n", playerUUID)
-		if err := h.db.Save(newGame); err != nil {
-			panic(err) // in case of Repository Save error
-		}
-		// Invalid first move
-		if err := newGame.ValidateState(&playerBoard); err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusBadRequest)
-			json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
-    		return
-		// Valid first move (player can go first or ai goes first if player sends blank board
-		} else {
-			newGame.Board = playerBoard // update board with player's move 
-			newGame.MakeAMove() // calculate computer move and update board
-			domain.PrintBoard(*newGame)
-			if err := h.db.Save(newGame); err != nil {
-				panic(err) // in case of Repository Save error
-			}
-			// Craft http json response 
-		    resp := FromDomainGameState(newGame)
-		    w.Header().Set("Content-Type", "application/json")
-		    w.WriteHeader(http.StatusOK)
-		    json.NewEncoder(w).Encode(resp)
-		}
+		 // calculate computer move and update board
+	    	response = FromDomainGameState(h.s.MakeAMove(playerUUID))
+	    	statusCode = http.StatusOK
 	}
+	// if no prior save exists
+	// } else {
+	// 	// Init game for player
+	// 	newGame := &domain.GameState{ Id: playerUUID,}
+	//
+	// 	c := color.New(color.FgHiYellow)
+	// 	c.Printf("[WEB]: uid: %v, msg: Initialized new GameState\n", playerUUID)
+	// 	if err := h.db.Save(newGame); err != nil {
+	// 		panic(err) // in case of Repository Save error
+	// 	}
+	// 	// Invalid first move
+	// 	if err := newGame.ValidateState(&playerBoard); err != nil {
+	// 		statusCode = http.StatusBadRequest
+	// 		response = map[string]string{"error": err.Error()}
+	//
+	// 	// Valid first move (player can go first or ai goes first if player sends blank board
+	// 	} else {
+	// 		newGame.Board = playerBoard // update board with player's move 
+	// 		newGame.MakeAMove() // calculate computer move and update board
+	// 		domain.PrintBoard(*newGame)
+	// 		if err := h.db.Save(newGame); err != nil {
+	// 			panic(err) // in case of Repository Save error
+	// 		}
+	//
+	// 	    	response = FromDomainGameState(newGame)
+	// 	    	statusCode = http.StatusOK
+	// 	}
+	// }
+	//
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(response)
+
+
 }

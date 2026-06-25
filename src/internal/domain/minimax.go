@@ -4,14 +4,14 @@ func Minimax(b *Board, depth uint8, turn int8) int {
     /* If Maximizer has won the game return his/her 
      evaluated score */
 	winner := FindWinner(b, 3)
-    if winner == ai { 
-        return 10
+    if winner == Ai { 
+        return 100 - int(depth)
 	}
 
     /* If Minimizer has won the game return his/her 
      evaluated score */
-    if winner == player {
-        return -10
+    if winner == Player {
+        return -100 - int(depth)
 	}
 
     /* If there are no more moves and no winner then 
@@ -22,14 +22,14 @@ func Minimax(b *Board, depth uint8, turn int8) int {
 
 	c := *b // make a copy of the board 
 
-	if turn == ai {
+	if turn == Ai {
 		best := -100000
 		for i:=0; i < H; i++ {
 			for j:=0; j < W; j++ {
 				if c.Cell[i][j] == 0 {
-					c.Cell[i][j] = ai
+					c.Cell[i][j] = Ai
 
-					score := Minimax(&c, depth + 1, player)
+					score := Minimax(&c, depth + 1, Player)
 					if best < score {
 						best = score
 					}
@@ -44,9 +44,9 @@ func Minimax(b *Board, depth uint8, turn int8) int {
 		for i:=0; i < H; i++ {
 			for j:=0; j < W; j++ {
 				if c.Cell[i][j] == 0 {
-					c.Cell[i][j] = player
+					c.Cell[i][j] = Player
 
-					score := Minimax(&c, depth + 1, ai)
+					score := Minimax(&c, depth + 1, Ai)
 					if score < best {
 						best = score
 
@@ -60,7 +60,7 @@ func Minimax(b *Board, depth uint8, turn int8) int {
 	}
 }
 
-/* searches for a winning sequence of cells and returns who won, or 0 if no winners were found. (97 == int8('a') for ai, 112 == int8('p') for player) */
+/* searches for a winning sequence of cells and returns who won, or 0 if no winners were found. (97 == int8('a') for Ai, 112 == int8('p') for Player) */
 func FindWinner(b *Board, min int) int8 {
 	// Check vertical 
 	winner := FindWinnerVert(b, H, W, min)

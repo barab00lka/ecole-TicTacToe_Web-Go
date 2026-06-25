@@ -8,8 +8,8 @@ const (
 )
 
 const (
-	player = int8('p')
-	ai = int8('a')
+	Player = int8('p')
+	Ai = int8('a')
 )
 
 type Board struct {
