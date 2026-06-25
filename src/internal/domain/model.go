@@ -9,7 +9,7 @@ const (
 
 const (
 	Player = int8('p')
-	Ai = int8('a')
+	Ai     = int8('a')
 )
 
 type Board struct {
@@ -17,15 +17,15 @@ type Board struct {
 }
 
 type Score struct {
-	Pl uint
-	Ai uint
+	Pl   uint
+	Ai   uint
 	Draw uint
 }
 
 type GameState struct {
 	Board
-	Over bool
+	Over   bool
 	Winner int8
-	Score // { player wins, ai wins, draws }
-	Id uuid.UUID 
+	Score  // { player wins, ai wins, draws }
+	Id     uuid.UUID
 }

@@ -1,14 +1,13 @@
 package service
 
 import (
-	"tictactoe/internal/datasource"
-	"tictactoe/internal/domain"
 	"errors"
 	"fmt" //debug
 	"github.com/fatih/color"
 	"github.com/google/uuid"
+	"tictactoe/internal/datasource"
+	"tictactoe/internal/domain"
 )
-
 
 type TicTacToe struct {
 	db datasource.Repository[*domain.GameState]
@@ -51,17 +50,17 @@ func (s *TicTacToe) MakeAMove(uid uuid.UUID) *domain.GameState {
 	return cur
 }
 
-func (s *TicTacToe) ValidateState(uid uuid.UUID, new *domain.Board) error  {
+func (s *TicTacToe) ValidateState(uid uuid.UUID, new *domain.Board) error {
 	game := s.db.Load(uid)
 	if game == nil {
 		game = domain.NewGame(uid)
 	} else if game.Over { // Clear the board
 		game.Board = domain.Board{}
-		game.Over = false 
-		game.Winner = 0 
+		game.Over = false
+		game.Winner = 0
 
 		c := color.New(color.FgHiYellow)
-		c.Printf("[WEB]: uid: %v, msg: Created new Board. Games played: %d\n", uid, game.Score.Ai + game.Score.Pl + game.Score.Draw)
+		c.Printf("[WEB]: uid: %v, msg: Created new Board. Games played: %d\n", uid, game.Score.Ai+game.Score.Pl+game.Score.Draw)
 	}
 
 	if err := s.db.Save(game); err == nil {
@@ -75,12 +74,12 @@ func (s *TicTacToe) ValidateState(uid uuid.UUID, new *domain.Board) error  {
 	var NMOVES int
 	for i := 0; i < domain.H; i++ {
 		for j := 0; j < domain.W; j++ {
-			move := new.Cell[i][j] - game.Cell[i][j]  
-			if move != 0 && move != domain.Player  { // if not valid move
+			move := new.Cell[i][j] - game.Cell[i][j]
+			if move != 0 && move != domain.Player { // if not valid move
 				return errors.New("GameState Error: invalid move")
 			}
 			if move == domain.Player {
-				NMOVES+=1
+				NMOVES += 1
 			}
 		}
 	}
@@ -91,12 +90,12 @@ func (s *TicTacToe) ValidateState(uid uuid.UUID, new *domain.Board) error  {
 	game.Board = *new
 	s.db.Save(game)
 
-	return nil 
+	return nil
 }
 
 /*debug print*/
-func PrintBoard(game domain.GameState){
-	for i :=0; i < 3; i++ {
+func PrintBoard(game domain.GameState) {
+	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
 			if val := game.Board.Cell[i][j]; val == 0 {
 				fmt.Printf("|_")

@@ -21,7 +21,7 @@ func IsBoardFull(b *Board) bool {
 	return true
 }
 
-func (s *Score) Update( winner int8) {
+func (s *Score) Update(winner int8) {
 	switch winner {
 	case Player:
 		s.Pl++
@@ -59,7 +59,6 @@ func (cur *Board) IsEmpty() bool {
 	return true
 }
 
-
 func GetNextMove(cur GameState) (uint8, uint8) {
 	if cur.Board.IsEmpty() {
 		return uint8(rand.UintN(uint(H))), uint8(rand.UintN(uint(W)))
@@ -69,8 +68,8 @@ func GetNextMove(cur GameState) (uint8, uint8) {
 	bi, bj := -1, -1
 
 	// for each possible game tree branch get best move
-	for i:=0; i < H; i++ {
-		for j:=0; j < W; j++ {
+	for i := 0; i < H; i++ {
+		for j := 0; j < W; j++ {
 			if cur.Board.Cell[i][j] == 0 {
 				cur.Board.Cell[i][j] = Ai
 
@@ -78,12 +77,12 @@ func GetNextMove(cur GameState) (uint8, uint8) {
 
 				cur.Board.Cell[i][j] = 0 // undo initial move
 
-                /* If the score after this move is 
-                 more than the best value, then update 
-                 best */ 
-                if simulatedScore > bestScore {                
-                    bi, bj = i,j
-                    bestScore = simulatedScore
+				/* If the score after this move is
+				   more than the best value, then update
+				   best */
+				if simulatedScore > bestScore {
+					bi, bj = i, j
+					bestScore = simulatedScore
 				}
 			}
 		}
@@ -91,4 +90,3 @@ func GetNextMove(cur GameState) (uint8, uint8) {
 
 	return uint8(bi), uint8(bj)
 }
-
